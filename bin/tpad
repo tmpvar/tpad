@@ -6,8 +6,7 @@ var
   version = require(__dirname + '/../package.json').version,
   repl = require('../lib/repl'),
   serial = require('../lib/serial'),
-  cleanup = c.reset.bind(c),
-  currentRepl;
+  cleanup = c.reset.bind(c);
 
 c.hex('CCFF00');
 
@@ -29,23 +28,45 @@ c.green();
 
 serial.init();
 
+var currentRepl = repl.start();
+
+var spinner = "|/-\\", spinnerPos = 0, spinnerTimer;
 serial.on('searching', function() {
-  console.log('searching..');
+  c.grey();
+  process.stdout.write('searching  ');
+
+
+  spinnerTimer = setInterval(function() {
+
+    c.back(1);
+    process.stdout.write(spinner[spinnerPos]);
+    c.reset();
+    spinnerPos++;
+    if (spinnerPos >= spinner.length) {
+      spinnerPos = 0;
+    }
+  }, 50);
 });
 
 serial.on('connected', function(data) {
+  clearInterval(spinnerTimer);
+
   c.green();
-  console.log('connected');
-  currentRepl = repl.start(data);
+
+  console.log('\n\nconnected to a', data.config.name, 'with', data.config.pads, 'pads');
+  c.reset();
+  currentRepl.updatePrompt(data.config);
+  c.reset();
 });
 
 serial.on('disconnected', function() {
   c.red();
   console.log('disconnected');
-  currentRepl.close();
-  currentRepl = null;
 });
 
 
-process.on('unhandledException', cleanup);
+process.on('unhandledException', function(e) {
+  console.log(e);
+  cleanup();
+});
 process.on('exit', cleanup);
