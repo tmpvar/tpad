@@ -28,7 +28,16 @@ c.green();
 
 serial.init();
 
-var currentRepl = repl.start();
+var currentRepl = repl.start(), currentSerialPort;
+
+currentRepl.context.color = function(light, r, g, b) {
+  console.log('sending', b);
+
+  if (currentSerialPort) {
+    currentSerialPort.write([light, r, g, b].join(',') + '\n');
+  }
+}
+
 
 var spinner = "|/-\\", spinnerPos = 0, spinnerTimer;
 serial.on('searching', function() {
@@ -56,11 +65,14 @@ serial.on('connected', function(data) {
   console.log('\n\nconnected to a', data.config.name, 'with', data.config.pads, 'pads');
   c.reset();
   currentRepl.updatePrompt(data.config);
+
+  currentRepl.context.sp = currentSerialPort = data.serialport;
   c.reset();
 });
 
 serial.on('disconnected', function() {
   c.red();
+  currentSerialPort = null;
   console.log('disconnected');
 });
 
