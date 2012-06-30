@@ -6,7 +6,9 @@ var
   version = require(__dirname + '/../package.json').version,
   repl = require('../lib/repl'),
   serial = require('../lib/serial'),
-  cleanup = c.reset.bind(c);
+  Tpad = require('../lib/tpad'),
+  cleanup = c.reset.bind(c),
+  color = require('color');
 
 c.hex('CCFF00');
 
@@ -30,14 +32,7 @@ serial.init();
 
 var currentRepl = repl.start(), currentSerialPort;
 
-currentRepl.context.color = function(light, r, g, b) {
-  console.log('sending', b);
-
-  if (currentSerialPort) {
-    currentSerialPort.write([light, r, g, b].join(',') + '\n');
-  }
-}
-
+currentRepl.context.color = color;
 
 var spinner = "|/-\\", spinnerPos = 0, spinnerTimer;
 serial.on('searching', function() {
@@ -57,16 +52,17 @@ serial.on('searching', function() {
   }, 50);
 });
 
-serial.on('connected', function(data) {
+serial.on('connected', function(config) {
   clearInterval(spinnerTimer);
 
   c.green();
 
-  console.log('\n\nconnected to a', data.config.name, 'with', data.config.pads, 'pads');
+  console.log('\n\nconnected to a', config.tpad.name, 'with', config.tpad.pads, 'pads');
   c.reset();
-  currentRepl.updatePrompt(data.config);
+  currentRepl.updatePrompt(config.tpad);
 
-  currentRepl.context.sp = currentSerialPort = data.serialport;
+  currentRepl.context.sp = currentSerialPort = config.serialport;
+  currentRepl.context.tpad = new Tpad(config);
   c.reset();
 });
 
