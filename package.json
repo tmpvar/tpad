@@ -1,0 +1,21 @@
+{
+  "author": "Elijah Insua <tmpvar@gmail.com> (http://tmpvar.com)",
+  "name": "tpad",
+  "description": "hackable pressure sensitive buttons",
+  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tmpvar/tpad.git"
+  },
+  "dependencies": {
+    "serialport": "~0.7.4",
+    "ansi": "~0.1.2",
+    "glob": "~3.1.10",
+    "async": "~0.1.22"
+  },
+  "devDependencies": {},
+  "optionalDependencies": {},
+  "engines": {
+    "node": "*"
+  }
+}

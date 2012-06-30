@@ -1,0 +1,51 @@
+#!/usr/bin/env node
+
+var
+  c = require('ansi')(process.stdout),
+  argv = require('optimist').argv,
+  version = require(__dirname + '/../package.json').version,
+  repl = require('../lib/repl'),
+  serial = require('../lib/serial'),
+  cleanup = c.reset.bind(c),
+  currentRepl;
+
+c.hex('CCFF00');
+
+
+console.log([
+'_/_/_/_/_/  _/_/_/      _/_/    _/_/_/',
+'   _/      _/    _/  _/    _/  _/    _/',
+'  _/      _/_/_/    _/_/_/_/  _/    _/',
+' _/      _/        _/    _/  _/    _/',
+'_/      _/        _/    _/  _/_/_/'].join('\n'));
+
+c.hex('aaaaaa');
+
+console.log('version:', version);
+
+c.reset();
+
+c.green();
+
+serial.init();
+
+serial.on('searching', function() {
+  console.log('searching..');
+});
+
+serial.on('connected', function(data) {
+  c.green();
+  console.log('connected');
+  currentRepl = repl.start(data);
+});
+
+serial.on('disconnected', function() {
+  c.red();
+  console.log('disconnected');
+  currentRepl.close();
+  currentRepl = null;
+});
+
+
+process.on('unhandledException', cleanup);
+process.on('exit', cleanup);
