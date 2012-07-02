@@ -14,7 +14,8 @@
     "async": "~0.1.22",
     "color": "~0.4.1",
     "hook.io": "~0.8.10",
-    "midi": "~v0.5.0"
+    "midi": "~v0.5.0",
+    "socket.io": "~0.9.6"
   },
   "devDependencies": {},
   "optionalDependencies": {},
