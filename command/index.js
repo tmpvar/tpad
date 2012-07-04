@@ -7,7 +7,13 @@ module.exports = function(repl) {
     matches.forEach(function(match) {
       if (match !== 'index.js') {
         var name = path.basename(match);
-        repl.context[name] = require(match);
+        var command = require(match);
+        repl.context[name] = function() {
+          var args = [];
+          Array.prototype.push.apply(args, arguments);
+          args.unshift(repl.context.tpad);
+          command.apply(command, args);
+        }
       }
     });
   });

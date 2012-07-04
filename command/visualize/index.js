@@ -37,7 +37,7 @@ var
 
 io.set('log level', 0);
 
-module.exports = function(spawnBrowser) {
+module.exports = function(tpad, spawnBrowser) {
   hook.start();
 
   hook.on('hook::ready', function() {

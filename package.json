@@ -17,6 +17,9 @@
     "midi": "~v0.5.0",
     "socket.io": "~0.9.6"
   },
+  "bin" : {
+    "tpad" : "./bin/tpad"
+  },
   "devDependencies": {},
   "optionalDependencies": {},
   "engines": {
