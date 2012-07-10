@@ -24,7 +24,7 @@ TODO: of course this will go to npm, very soon.
 
 `tpad(index).color('#fff');` - change the color of an individual pad
 
-`tpad(0).on('pressure', function(p) { p.color(color().hsv((p.value/18000)*360, 100, 100)); }}` - change the color of pad[0] based on the amount of pressure applied
+`tpad(0).on('pressure', function(p) { p.color(color().hsv((p.value/18000)*360, 100, 100)); })` - change the color of pad[0] based on the amount of pressure applied
 
 
 ##### pre-baked functionality
