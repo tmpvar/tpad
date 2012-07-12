@@ -25,40 +25,28 @@ var
       }
     })
   }),
-  io = socketio.listen(server),
-  hook = require('hook.io').createHook({
-    ignoreSTDIN : true,
-    debug: true,
-    name: 'tpad::visualize',
-    silent: true
-  }),
-  config = null,
+  io,
   spawn = require('child_process').spawn;
 
-io.set('log level', 0);
-
 module.exports = function(tpad, spawnBrowser) {
-  hook.start();
+  if (!io) {
+    io = socketio.listen(server);
+    io.set('log level', 0);
+  }
 
-  hook.on('hook::ready', function() {
-    console.log('visualizer is connected');
+  io.sockets.on('connection', function(socket) {
 
-    hook.emit('tpad::config::request');
+    // send configuration data
+    socket.emit('tpad::config', tpad.config);
+  });
 
-    hook.on('tpad::config', function(config) {
+  server.listen(1024);
 
-      io.sockets.on('connection', function(socket) {
+  (spawnBrowser !== false) && spawn('open', ['http://localhost:1024/']);
 
-        // send configuration data
-        socket.emit('tpad::config', config);
-      });
-
-      server.listen(1024);
-      (spawnBrowser !== false) && spawn('open', ['http://localhost:1024/']);
-    });
-
-    var time = 0;
-    hook.on('tpad::pressure', function(pad) {
+  var time = 0;
+  tpad.each(function(pad) {
+    pad.on('pressure', function() {
       var now = Date.now();
       if (pad.value === 0 || now - time > 1000/20) {
         io.sockets.emit('tpad::pressure', [pad.index, pad.value].join(','));

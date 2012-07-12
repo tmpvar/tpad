@@ -7,7 +7,6 @@ var
   repl = require('../lib/repl'),
   serial = require('../lib/serial'),
   Tpad = require('../lib/tpad'),
-  hook = require('../lib/hookio'),
   cleanup = c.reset.bind(c),
   color = require('color');
 
@@ -34,15 +33,6 @@ serial.init();
 var currentRepl = repl.start(), currentSerialPort;
 
 currentRepl.context.color = color;
-currentRepl.context.hook = hook;
-
-
-hook.on('tpad::*::tpad::config::request', function(data) {
-  if (currentRepl.context.tpad) {
-    hook.emit('tpad::config', currentRepl.context.tpad.config);
-  }
-});
-
 
 require('../command')(currentRepl);
 
@@ -75,23 +65,6 @@ serial.on('connected', function(config) {
 
   currentRepl.context.sp = currentSerialPort = config.serialport;
   var tpad = currentRepl.context.tpad = new Tpad(config);
-
-  hook.emit('tpad::config', tpad.config);
-
-
-  tpad.each(function(pad, index) {
-    pad.on('pressure', function(p) {
-      hook.emit('tpad::pressure', p);
-    });
-
-    pad.on('press', function(p) {
-      hook.emit('tpad::press', p);
-    });
-
-    pad.on('depress', function(p) {
-      hook.emit('tpad::depress', p);
-    });
-  });
 
   c.reset();
 });
