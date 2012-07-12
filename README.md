@@ -3,10 +3,7 @@
 ## Usage
 ### repl mode
 
-    git clone https://github.com/tmpvar/tpad.git
-    cd tpad
-    npm install .
-    bin/tpad
+    npm install -g tpad
 
 TODO: of course this will go to npm, very soon.
 
