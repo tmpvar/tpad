@@ -5,7 +5,6 @@
 
     npm install -g tpad
 
-TODO: of course this will go to npm, very soon.
 
 #### commands
 
