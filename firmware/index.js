@@ -21,9 +21,8 @@ var firmware = module.exports = function(options) {
   // TODO: ensure you can specify a firmware dir
 
   firmware.fetch(function(err, folder) {
-    console.log(folder);
     firmware.build(folder, function(err) {
-      firmware.flash(folder);
+      firmware.flash(folder, options);
     });
   });
 
@@ -47,8 +46,6 @@ firmware.fetch = function(fn) {
       size,
       passed  = 0,
       where = 0;
-
-      // TODO: check if the sha exists
 
     fs.exists(shaDir, function(exists) {
       if (!exists) {
@@ -93,39 +90,56 @@ firmware.build = function(dir, fn) {
   exec('make', {
     cwd : dir
   }, function (error, stdout, stderr) {
-    console.log('stdout: ' + stdout);
-    console.log('stderr: ' + stderr);
-    if (error !== null) {
-      console.log('exec error: ' + error);
+    if (error) {
+      throw error;
+    } else {
+      fn();
     }
-    fn();
   });
 };
 
 // Basically wait for the known tpad connection to drop
 // wait 2 seconds then run avrdude
-firmware.waitForUser = function(dir, fn) {
-  setTimeout(function() {
-    // TODO: figure out what type of tpad is attached
-    fn(dir + '/tpad/tpad4-mega');
-  }, 2000);
+firmware.waitForUser = function(dir, options, fn) {
+
+  var state = 0;
+  setTimeout(function tick() {
+    fs.exists(options.serialport.port, function(e) {
+
+      // ready to go!
+      if (!e) {
+        process.stdout.write('.')
+        state = 1;
+        setTimeout(tick, 100);
+      } else if (state === 1) {
+        console.log('ready to flash.. waiting');
+        options.serialport.close();
+        setTimeout(function() {
+          fn(dir + '/tpad/' + options.tpad.name);
+        }, 2000);
+      } else {
+        setTimeout(tick, 100);
+      }
+    });
+  }, 100);
 };
 
-firmware.flash = function(dir) {
+firmware.flash = function(dir, options, fn) {
+
   console.log('Please press reset on the device.....');
 
-  firmware.waitForUser(dir, function(tpadFirmwareDir) {
+  firmware.waitForUser(dir,options, function(tpadFirmwareDir) {
     console.log('flashing...');
+    var env = process.env;
+    env.AVRDUDE_PORT = options.serialport.port;
 
     exec('make avrdude', {
       cwd : tpadFirmwareDir,
-      // TODO: specify AVRDUDE_PORT
-    }, function (error, stdout, stderr) {
-      console.log('stdout: ' + stdout);
-      console.log('stderr: ' + stderr);
-      if (error !== null) {
-        console.log('exec error: ' + error);
-      }
+      env : env
+    }, function (err, stdout, stderr) {
+      if (err) { throw err; }
+      console.log('OK!')
+      process.exit();
     });
   });
 };
