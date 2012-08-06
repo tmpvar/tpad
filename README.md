@@ -10,7 +10,7 @@
 
 `tpad(index, color)` - change the color of a pad
 
-`tpad.color('#FF0')`- set the color of all the leds
+`tpad.color('#FF0')` or `tpad('F00')` - set the color of all the leds
 
 ##### pad operations
 
