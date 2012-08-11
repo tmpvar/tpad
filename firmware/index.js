@@ -1,11 +1,13 @@
 var
   fs      = require('fs'),
+  path    = require('path'),
   request = require('request'),
   async   = require('async'),
   EM      = require('events').EventEmitter,
   tar     = require('tar'),
   zlib    = require('zlib'),
-  exec    = require('child_process').exec;
+  exec    = require('child_process').exec,
+  semver  = require('semver');
 
 function error() {
   console.log(arguments);
@@ -13,20 +15,22 @@ function error() {
 
 var firmware = module.exports = function(options) {
   options = options || {};
-
   var
-    emitter        = new EM()
     firmwareFolder = options.location || __dirname + '/tpad-firmware';
 
   // TODO: ensure you can specify a firmware dir
-
-  firmware.fetch(function(err, folder) {
-    firmware.build(folder, function(err) {
-      firmware.flash(folder, options);
+  if (!options.location) {
+    firmware.fetch(function(err, folder) {
+      firmware.build(folder, function(err) {
+        firmware.flash(folder, options);
+      });
     });
-  });
-
-  return emitter;
+  } else {
+    console.log('Using firmware', path.resolve(options.location));
+    firmware.build(firmwareFolder, function(err) {
+      firmware.flash(firmwareFolder, options);
+    })
+  }
 };
 
 
@@ -37,15 +41,20 @@ firmware.fetch = function(fn) {
   request('https://api.github.com/repos/tmpvar/tpad-firmware/git/refs/tags', function(err, res) {
     var
       data    = JSON.parse(res.body),
-      latest  = data.pop(),
-      sha     = latest.object.sha.substring(0,7),
-      shaDir  = __dirname + '/tmpvar-tpad-firmware-' + sha,
-      url     = 'https://github.com/tmpvar/tpad-firmware/tarball/' + sha,
-      req,
       first   = true,
-      size,
       passed  = 0,
-      where = 0;
+      where   = 0,
+      latest, sha, shaDir, size, url, req;
+
+    // find the latest version
+    data.sort(function(a, b) {
+      return (semver.gt(a, b)) ? -1 : 1;
+    });
+
+    latest = data[0];
+    sha = latest.object.sha.substring(0,7);
+    url = 'https://github.com/tmpvar/tpad-firmware/tarball/' + sha;
+    shaDir = __dirname + '/tmpvar-tpad-firmware-' + sha
 
     fs.exists(shaDir, function(exists) {
       if (!exists) {
@@ -100,7 +109,15 @@ firmware.build = function(dir, fn) {
 
 // Basically wait for the known tpad connection to drop
 // wait 2 seconds then run avrdude
-firmware.waitForUser = function(dir, options, fn) {
+firmware.waitForReset = function(dir, options, fn) {
+
+  // attempt a software reset (as of firmware 0.0.2)
+  if (options.tpad.version && semver.gte(options.tpad.version, '0.0.2')) {
+    process.stdout.write('tpad is resetting')
+    options.serialport.write('!');
+  } else {
+    console.log(' ** Please press reset on the device **');
+  }
 
   var state = 0;
   setTimeout(function tick() {
@@ -112,11 +129,15 @@ firmware.waitForUser = function(dir, options, fn) {
         state = 1;
         setTimeout(tick, 100);
       } else if (state === 1) {
-        console.log('ready to flash.. waiting');
+        console.log('\ntpad is booting..');
+
+        // we don't want to mess with the pad while it's being flashed
+        // so close the serial connection for good measure.
         options.serialport.close();
+
         setTimeout(function() {
           fn(dir + '/tpad/' + options.tpad.name);
-        }, 2000);
+        }, 500);
       } else {
         setTimeout(tick, 100);
       }
@@ -125,10 +146,7 @@ firmware.waitForUser = function(dir, options, fn) {
 };
 
 firmware.flash = function(dir, options, fn) {
-
-  console.log('Please press reset on the device.....');
-
-  firmware.waitForUser(dir,options, function(tpadFirmwareDir) {
+  firmware.waitForReset(dir,options, function(tpadFirmwareDir) {
     console.log('flashing...');
     var env = process.env;
     env.AVRDUDE_PORT = options.serialport.port;
