@@ -36,7 +36,7 @@ var currentRepl = repl.start(), currentSerialPort;
 
 currentRepl.context.color = color;
 
-require('../command')(currentRepl);
+
 
 var spinner = "|/-\\", spinnerPos = 0, spinnerTimer;
 serial.on('searching', function() {
@@ -62,6 +62,8 @@ serial.on('connected', function() {
 
 // Normal repl mode
 if (!command) {
+
+  require('../command')(currentRepl);
 
   serial.on('connected', function(config) {
     clearInterval(spinnerTimer);
