@@ -94,6 +94,10 @@ if (!command) {
 
         // Disable reconnect as it gets in the way of the flashing operation
         config.serialport.removeAllListeners('close');
+
+        // allow the user to specify a development version of the tpad firmware
+        config.location = argv._[1] || null;
+
         flash(config);
       });
 
