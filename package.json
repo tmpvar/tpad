@@ -22,6 +22,9 @@
     "midi": "~v0.5.0",
     "socket.io": "~0.9.6",
     "optimist": "~0.3.4",
+    "tar": "~0.1.13",
+    "semver": "1.0.14",
+    "request": "~2.10.0",
     "chip.avr.lufacdc": "0.0.1"
   },
   "bin": {
