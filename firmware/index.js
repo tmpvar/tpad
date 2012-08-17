@@ -26,10 +26,11 @@ var firmware = module.exports = function(options) {
       firmware.flash(hexData, options);
     });
   } else {
-    console.log('Using firmware', path.resolve(options.location));
-    firmware.build(firmwareFolder, options, function(err) {
-      firmware.flash(firmwareFolder, options);
-    })
+    var hexFilePath = path.resolve(options.location);
+    console.log('Using firmware', hexFilePath);
+    fs.readFile(hexFilePath, function(err, data) {
+      firmware.flash(data.toString(), options);
+    });
   }
 };
 
@@ -68,28 +69,8 @@ firmware.fetch = function(options, fn) {
   });
 };
 
-// build all of the firmware
-firmware.build = function(dir, options, fn) {
-
-  if (options.build) {
-    console.log('building...');
-
-    exec('make', {
-      cwd : dir
-    }, function (error, stdout, stderr) {
-      if (error) {
-        throw error;
-      } else {
-        fn();
-      }
-    });
-  } else {
-    fn();
-  }
-};
-
 // Basically wait for the known tpad connection to drop
-// wait 2 seconds then run avrdude
+// wait 2 seconds then run chip.avr.lufacdc's flash mechanism
 firmware.waitForReset = function(options, fn) {
 
   // attempt a software reset (as of firmware 0.0.2)
