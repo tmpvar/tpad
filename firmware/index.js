@@ -112,7 +112,7 @@ firmware.flash = function(hexData, options, fn) {
     var sp = new SerialPort(options.serialport.port);
 
     sp.on('open', function() {
-      lufacdc.init(sp, options, function (err, flasher) {
+      lufacdc.init(sp, function (err, flasher) {
         if (err) {
           throw err;
         }
