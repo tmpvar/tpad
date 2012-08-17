@@ -1,4 +1,10 @@
-var midi = require('midi');
+try {
+  var midi = require('midi');
+} catch (e) {
+  console.log('WARNING: midi module not found, it will not work!');
+  module.exports = function() {};
+  return;
+}
 var MAX = 18000;
 var output = new midi.output();
 output.getPortCount();
