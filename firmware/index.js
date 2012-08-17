@@ -39,6 +39,10 @@ firmware.fetch = function(options, fn) {
   // get the latest firmware
   console.log('finding the latest firmware');
   request('https://api.github.com/repos/tmpvar/tpad-firmware/git/refs/tags', function(err, res) {
+    if (err) {
+      return fn(err);
+    }
+
     var data    = JSON.parse(res.body);
 
     // find the latest version
@@ -127,18 +131,19 @@ firmware.flash = function(hexData, options, fn) {
     var sp = new SerialPort(options.serialport.port);
 
     sp.on('open', function() {
-      lufacdc.init(sp, function (err, flasher) {
+      lufacdc.init(sp, options, function (err, flasher) {
         if (err) {
           throw err;
         }
 
+        console.log('\nerasing chip')
         flasher.erase(function() {
-          console.log('initialized');
 
+          console.log('programming');
           flasher.program(hexData, function(err) {
             if (err) throw err;
-            console.log('programmed!');
 
+            console.log('verifying')
             flasher.verify(function(err) {
               if (err) {
                 throw err

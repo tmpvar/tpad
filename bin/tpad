@@ -99,7 +99,7 @@ if (!command) {
 
         // allow the user to specify a development version of the tpad firmware
         config.location = argv._[1] || null;
-
+        config.debug = !!argv.debug;
         flash(config);
       });
 
