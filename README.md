@@ -29,7 +29,7 @@ _very_ basic animation
 
 ```javascript
 
-tpad.animate(milliseconds, [0,1,2,3], function(pad) {
+tpad.animate(100, [0,1,2,3], function(pad) {
   tpad.color('000'); // turn all the lights off
   pad.color('F00'); // turn the current pad red
 });
