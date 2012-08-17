@@ -10,7 +10,7 @@
 
 `tpad(index, color)` - change the color of a pad
 
-`tpad.color('#FF0')` or `tpad('F00')` - set the color of all the leds
+`tpad.color('#FF0')` - set the color of all the leds
 
 ##### pad operations
 
@@ -18,9 +18,9 @@
 
 `tpad(index).on([pressure,press,depress], function(pad) {})` - bind to events
 
-`tpad(index).color('#fff');` - change the color of an individual pad
+`tpad(index).color('#fff');` - change the color of an individual button
 
-`tpad(0).on('pressure', function(p) { p.color(color().hsv((p.value/18000)*360, 100, 100)); })` - change the color of pad[0] based on the amount of pressure applied
+`tpad(0).on('pressure', function(p) { p.color(color().hsv((p.value/18000)*360, 100, 100)); })` - change the color of button[0] based on the amount of pressure applied
 
 
 ##### pre-baked functionality
@@ -29,9 +29,24 @@ _very_ basic animation
 
 ```javascript
 
-tpad.animate(milliseconds, [0,1,2,3], function(pad) {
+tpad.animate(100, [0,1,2,3], function(pad) {
   tpad.color('000'); // turn all the lights off
   pad.color('F00'); // turn the current pad red
+});
+```
+
+or shift on hsv!
+
+```javascript
+
+var a = 0;
+tpad.animate(100, [0,1,3,2], function(p) {
+  a+=70;
+  if(a>360) {
+    a=0;    
+  }
+  
+  p.color(color().hsv(a, 100, 100));
 });
 ```
 
