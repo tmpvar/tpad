@@ -2,7 +2,7 @@
   "author": "Elijah Insua <tmpvar@gmail.com> (http://tmpvar.com)",
   "name": "tpad",
   "description": "an array of hackable pressure sensitive buttons",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "contributors": [
     {
       "name": "Mikeal Rogers",
@@ -19,10 +19,8 @@
     "glob": "~3.1.10",
     "async": "~0.1.22",
     "color": "~0.4.1",
-    "midi": "~v0.5.0",
     "socket.io": "~0.9.6",
     "optimist": "~0.3.4",
-    "tar": "~0.1.13",
     "semver": "1.0.14",
     "request": "~2.10.0",
     "chip.avr.lufacdc": "0.0.1"
@@ -31,7 +29,9 @@
     "tpad": "./bin/tpad"
   },
   "devDependencies": {},
-  "optionalDependencies": {},
+  "optionalDependencies": {
+    "midi": "~v0.5.0"
+  },
   "engines": {
     "node": "*"
   }
