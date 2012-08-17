@@ -3,11 +3,13 @@
   "name": "tpad",
   "description": "an array of hackable pressure sensitive buttons",
   "version": "0.0.3",
-  "contributors" : [{
-    "name" : "Mikeal Rogers",
-    "email" : "mikeal.rogers@gmail.com>"
-  }],
-  "repository" : {
+  "contributors": [
+    {
+      "name": "Mikeal Rogers",
+      "email": "mikeal.rogers@gmail.com>"
+    }
+  ],
+  "repository": {
     "type": "git",
     "url": "git://github.com/tmpvar/tpad.git"
   },
@@ -19,8 +21,7 @@
     "color": "~0.4.1",
     "midi": "~v0.5.0",
     "socket.io": "~0.9.6",
-    "optimist": "~0.3.4",
-    "tar": "~0.1.13"
+    "optimist": "~0.3.4"
   },
   "bin": {
     "tpad": "./bin/tpad"
