@@ -4,8 +4,6 @@ var
   request = require('request'),
   async   = require('async'),
   EM      = require('events').EventEmitter,
-  tar     = require('tar'),
-  zlib    = require('zlib'),
   exec    = require('child_process').exec,
   semver  = require('semver'),
   lufacdc = require('chip.avr.lufacdc'),
