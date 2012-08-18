@@ -23,15 +23,14 @@
     "optimist": "~0.3.4",
     "semver": "1.0.14",
     "request": "~2.10.0",
-    "chip.avr.lufacdc": "0.0.1"
+    "chip.avr.lufacdc": "0.0.1",
+    "ecstatic": "0.1.6",
+    "socket.io": "0.9.10"
   },
   "bin": {
     "tpad": "./bin/tpad"
   },
   "devDependencies": {},
-  "optionalDependencies": {
-    "midi": "~v0.5.0"
-  },
   "engines": {
     "node": "*"
   }
