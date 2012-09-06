@@ -8,10 +8,10 @@ catch(err){
 var socket = io.connect('http://localhost:8000')
 
 var sounds = {
-  0: document.querySelector('#ding'),
+  0: document.querySelector('#catmeow'),
   1: document.querySelector('#snare'),
-  2: document.querySelector('#hihat'),
-  3: document.querySelector('#clap')
+  2: document.querySelector('#kick'),
+  3: document.querySelector('#meow')
 }
 
 socket.on('hit', function(hit) {
