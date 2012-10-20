@@ -1,22 +1,23 @@
-var tpad = require('../lib/tpad');
+var tpad = require('../lib');
 
-tpad.init(function (err, tpad) {
-  if (err) throw err
+tpad(function (tmpad) {
 
-  var colors = 
-      [ 'CC0033'
-      , '990099'
-      , '66CC66'
-      , '333399'
-      , '00E5EE'
+  var colors =
+      [ '#CC0033'
+      , '#990099'
+      , '#66CC66'
+      , '#333399'
+      , '#00E5EE'
       ]
-    
+
   var pnum = 0
     , cindex = 0
     ;
-  tpad.animate(300, [0,1,2,3], function(pad) {
-    tpad.color('000') // turn all the lights off
-    pad.color(colors[cindex]) // turn the current pad to a color
+
+  tmpad.animate(300, [0,1,2,3], function(button) {
+    tmpad.color('000') // turn all the lights off
+    button.color(colors[cindex]) // turn the current button to a color
+
     pnum += 1
     if (pnum === 4) {
       pnum = 0
