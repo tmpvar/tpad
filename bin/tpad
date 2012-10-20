@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
+
 var
   c = require('ansi')(process.stdout),
   argv = require('optimist').argv,
   version = require(__dirname + '/../package.json').version,
-  repl = require('../lib/repl'),
-  serial = require('../lib/serial'),
-  Tpad = require('../lib/tpad'),
+  repl = require('../lib/repl').start(),
+  serial = require('serialport-manager'),
   cleanup = c.reset.bind(c),
-  color = require('color')
+  color = require('color'),
   flash = require('../firmware'),
-  command = argv._[0] || null;
+  command = argv._[0] || null,
+  tpad = require('../lib/');
 
 c.hex('CCFF00');
 
@@ -25,72 +26,40 @@ console.log([
 c.hex('aaaaaa');
 
 console.log('version:', version);
-
 c.reset();
-
 c.green();
 
-serial.init();
-
-var currentRepl = repl.start(), currentSerialPort;
-
-currentRepl.context.color = color;
-
-
-
-var spinner = "|/-\\", spinnerPos = 0, spinnerTimer;
-serial.on('searching', function() {
-  c.grey();
-  process.stdout.write('searching  ');
-
-
-  spinnerTimer = setInterval(function() {
-
-    c.back(1);
-    process.stdout.write(spinner[spinnerPos]);
-    c.reset();
-    spinnerPos++;
-    if (spinnerPos >= spinner.length) {
-      spinnerPos = 0;
-    }
-  }, 50);
-});
-
-serial.on('connected', function() {
-  clearInterval(spinnerTimer);
-});
+repl.context.color = color;
 
 // Normal repl mode
 if (!command) {
+  require('../command')(repl);
 
-  require('../command')(currentRepl);
+  var ev = tpad(function(tmpad) {
 
-  serial.on('connected', function(config) {
-    clearInterval(spinnerTimer);
+    console.log(
+      '\n\nconnected to a',
+       tmpad.config.name,
+      'with',
+      tmpad.config.pads,
+      'pads'
+    );
 
-    c.green();
+    repl.context.tpad = tmpad;
 
-    console.log('\n\nconnected to a', config.tpad.name, 'with', config.tpad.pads, 'pads');
-    c.reset();
-    currentRepl.updatePrompt(config.tpad);
-
-    currentRepl.context.sp = currentSerialPort = config.serialport;
-    var tpad = currentRepl.context.tpad = new Tpad(config);
-
-    c.reset();
+    c.green().reset();
+    repl.updatePrompt(tmpad.config);
   });
 
-  serial.on('disconnected', function() {
-    c.red();
-    currentSerialPort = null;
-    console.log('disconnected');
-  });
-
+  ev.on('searching', function() {console.log('searching...') });
+  ev.on('connected', function() { console.log('connected') });
+  ev.on('disconnected', function() { console.log('disconnected') });
 } else {
+
   switch (command) {
     case 'flash':
       console.log('Please connect _only_ the tpad you want to flash')
-      serial.on('connected', function(config) {
+      tpad(function(tmpad) {
 
         serial.removeAllListeners('searching');
 
@@ -99,20 +68,19 @@ if (!command) {
 
         // allow the user to specify a development version of the tpad firmware
         config.location = argv._[1] || null;
+
         config.debug = !!argv.debug;
-        flash(config);
+
+        flash(tmpad);
       });
 
     break;
   }
 }
 
-
-
-
-
 process.on('unhandledException', function(e) {
   console.log(e);
   cleanup();
 });
+
 process.on('exit', cleanup);

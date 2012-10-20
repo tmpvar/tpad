@@ -4,21 +4,15 @@
   "description": "an array of hackable pressure sensitive buttons",
   "version": "0.0.7",
   "contributors": [
-    {
-      "name": "Mikeal Rogers",
-      "email": "mikeal.rogers@gmail.com"
-    },
-    {
-      "name": "Max Ogden",
-      "email": "max@maxogden.com"
-    }
+    "Mikeal Rogers <mikeal.rogers@gmail.com>",
+    "Max Ogden <max@maxogden.com>"
   ],
   "repository": {
     "type": "git",
     "url": "git://github.com/tmpvar/tpad.git"
   },
   "dependencies": {
-    "serialport-manager": "0.0.1",
+    "serialport-manager": "*",
     "ansi": "~0.1.2",
     "glob": "~3.1.10",
     "async": "~0.1.22",
@@ -29,7 +23,8 @@
     "request": "~2.10.0",
     "chip.avr.lufacdc": "0.0.1",
     "ecstatic": "0.1.6",
-    "event-stream": "~3.0.7"
+    "event-stream": "~3.0.7",
+    "midi": "https://github.com/tmpvar/node-midi/tarball/master"
   },
   "bin": {
     "tpad": "./bin/tpad"
@@ -40,5 +35,19 @@
   "devDependencies": {},
   "engines": {
     "node": "*"
-  }
+  },
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hardware",
+    "tmpad",
+    "tpad",
+    "stream",
+    "nodebots",
+    "robotjs",
+    "serialport"
+  ],
+  "license": "MIT"
 }

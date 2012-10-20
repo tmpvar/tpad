@@ -7,7 +7,7 @@ var
   exec    = require('child_process').exec,
   semver  = require('semver'),
   lufacdc = require('chip.avr.lufacdc'),
-  SerialPort = require('serialport').SerialPort;
+  SerialPort = require('../node_modules/serialport-manager/node_modules/serialport').SerialPort;
 
 function error() {
   console.log(arguments);
