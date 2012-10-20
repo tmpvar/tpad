@@ -5,7 +5,7 @@ var
   c = require('ansi')(process.stdout),
   argv = require('optimist').argv,
   version = require(__dirname + '/../package.json').version,
-  repl = require('../lib/repl').start(),
+  repl = require('../lib/repl'),
   serial = require('serialport-manager'),
   cleanup = c.reset.bind(c),
   color = require('color'),
@@ -13,69 +13,87 @@ var
   command = argv._[0] || null,
   tpad = require('../lib/');
 
-c.hex('CCFF00');
 
-
-console.log([
-'_/_/_/_/_/  _/_/_/      _/_/    _/_/_/',
-'   _/      _/    _/  _/    _/  _/    _/',
-'  _/      _/_/_/    _/_/_/_/  _/    _/',
-' _/      _/        _/    _/  _/    _/',
-'_/      _/        _/    _/  _/_/_/'].join('\n'));
-
-c.hex('aaaaaa');
-
-console.log('version:', version);
-c.reset();
-c.green();
-
-repl.context.color = color;
-
+// make tpad a proper unix citizen
+if (argv.i || argv.o) {
+  if (argv.i) {
+    tpad(function(tmpad) {
+      console.log(tmpad);
+      process.stdin.pipe(tmpad);
+      if (argv.o) {
+        tmpad.pipe(process.stdout);
+      }
+      process.stdin.resume();
+    });
+  } else {
+    tpad(function(tmpad) {
+      tmpad.pipe(process.stdout);
+    });
+  }
 // Normal repl mode
-if (!command) {
-  require('../command')(repl);
-
-  var ev = tpad(function(tmpad) {
-
-    console.log(
-      '\n\nconnected to a',
-       tmpad.config.name,
-      'with',
-      tmpad.config.pads,
-      'pads'
-    );
-
-    repl.context.tpad = tmpad;
-
-    c.green().reset();
-    repl.updatePrompt(tmpad.config);
-  });
-
-  ev.on('searching', function() {console.log('searching...') });
-  ev.on('connected', function() { console.log('connected') });
-  ev.on('disconnected', function() { console.log('disconnected') });
 } else {
+  c.hex('CCFF00');
+  repl = repl.start();
 
-  switch (command) {
-    case 'flash':
-      console.log('Please connect _only_ the tpad you want to flash')
-      var manager = tpad(function(tmpad) {
+  console.log([
+  '_/_/_/_/_/  _/_/_/      _/_/    _/_/_/',
+  '   _/      _/    _/  _/    _/  _/    _/',
+  '  _/      _/_/_/    _/_/_/_/  _/    _/',
+  ' _/      _/        _/    _/  _/    _/',
+  '_/      _/        _/    _/  _/_/_/'].join('\n'));
 
-        // Disable reconnect as it gets in the way of
-        // the flashing operation
-        manager.disableReconnect()
+  c.hex('aaaaaa');
 
-        flash(tmpad, {
+  console.log('version:', version);
+  c.reset();
+  c.green();
 
-          // emit a ton of debugging information?
-          debug : !!argv.debug,
+  repl.context.color = color;
+  if (!command) {
+    require('../command')(repl);
 
-          // allow the user to specify a development version of the tpad firmware
-          location : argv._[1] || null
+    var ev = tpad(function(tmpad) {
+
+      console.log(
+        '\n\nconnected to a',
+         tmpad.config.name,
+        'with',
+        tmpad.config.pads,
+        'pads'
+      );
+
+      repl.context.tpad = tmpad;
+
+      c.green().reset();
+      repl.updatePrompt(tmpad.config);
+    });
+
+    ev.on('searching', function() {console.log('searching...') });
+    ev.on('connected', function() { console.log('connected') });
+    ev.on('disconnected', function() { console.log('disconnected') });
+  } else {
+
+    switch (command) {
+      case 'flash':
+        console.log('Please connect _only_ the tpad you want to flash')
+        var manager = tpad(function(tmpad) {
+
+          // Disable reconnect as it gets in the way of
+          // the flashing operation
+          manager.disableReconnect()
+
+          flash(tmpad, {
+
+            // emit a ton of debugging information?
+            debug : !!argv.debug,
+
+            // allow the user to specify a development version of the tpad firmware
+            location : argv._[1] || null
+          });
         });
-      });
 
-    break;
+      break;
+    }
   }
 }
 
