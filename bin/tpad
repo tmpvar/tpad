@@ -59,19 +59,20 @@ if (!command) {
   switch (command) {
     case 'flash':
       console.log('Please connect _only_ the tpad you want to flash')
-      tpad(function(tmpad) {
+      var manager = tpad(function(tmpad) {
 
-        serial.removeAllListeners('searching');
+        // Disable reconnect as it gets in the way of
+        // the flashing operation
+        manager.disableReconnect()
 
-        // Disable reconnect as it gets in the way of the flashing operation
-        config.serialport.removeAllListeners('close');
+        flash(tmpad, {
 
-        // allow the user to specify a development version of the tpad firmware
-        config.location = argv._[1] || null;
+          // emit a ton of debugging information?
+          debug : !!argv.debug,
 
-        config.debug = !!argv.debug;
-
-        flash(tmpad);
+          // allow the user to specify a development version of the tpad firmware
+          location : argv._[1] || null
+        });
       });
 
     break;

@@ -13,20 +13,26 @@ function error() {
   console.log(arguments);
 }
 
-var firmware = module.exports = function(options) {
+var firmware = module.exports = function(tmpad, options) {
   options = options || {};
+  options.serialport = tmpad.sp
+  options.name = tmpad.config.name;
+  options.version = tmpad.config.version;
+
   var
     firmwareFolder = options.location || __dirname + '/tpad-firmware';
 
   // TODO: ensure you can specify a firmware dir
   if (!options.location) {
     firmware.fetch(options, function(err, hexData) {
+      if (err) throw err;
       firmware.flash(hexData, options);
     });
   } else {
     var hexFilePath = path.resolve(options.location);
     console.log('Using firmware', hexFilePath);
     fs.readFile(hexFilePath, function(err, data) {
+      if (err) throw err;
       firmware.flash(data.toString(), options);
     });
   }
@@ -44,14 +50,20 @@ firmware.fetch = function(options, fn) {
 
     var data    = JSON.parse(res.body);
 
+    console.log('found', data.length, 'versions');
+
     // find the latest version
     data.sort(function(a, b) {
+      a = a.ref.replace('/regs/tags/','');
+      b = b.ref.replace('/regs/tags/','');
+
       return (semver.gt(a, b)) ? -1 : 1;
     });
 
     var latest = data[0];
     var tag = latest.ref.replace('refs/tags/', '');
-    var tpad = options.tpad.name;
+
+    var tpad = options.name;
 
     var url = 'https://raw.github.com/tmpvar/tpad-firmware/' + tag +
           '/tpad/' + tpad + '/' + tpad + '.hex';
@@ -72,7 +84,7 @@ firmware.fetch = function(options, fn) {
 firmware.waitForReset = function(options, fn) {
 
   // attempt a software reset (as of firmware 0.0.2)
-  if (options.tpad.version && semver.gte(options.tpad.version, '0.0.2')) {
+  if (options.version && semver.gte(options.version, '0.0.2')) {
     process.stdout.write('tpad is resetting')
     options.serialport.write('!');
   } else {
@@ -81,7 +93,7 @@ firmware.waitForReset = function(options, fn) {
 
   var state = 0;
   setTimeout(function tick() {
-    fs.exists(options.serialport.port, function(e) {
+    fs.exists(options.serialport.readStream.path, function(e) {
 
       // ready to go!
       if (!e) {
@@ -107,7 +119,7 @@ firmware.flash = function(hexData, options, fn) {
       return;
     }
 
-    var sp = new SerialPort(options.serialport.port);
+    var sp = new SerialPort(options.serialport.readStream.path);
 
     sp.on('open', function() {
       lufacdc.init(sp, function (err, flasher) {
