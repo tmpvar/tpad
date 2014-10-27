@@ -18,18 +18,16 @@
     "url": "git://github.com/tmpvar/tpad.git"
   },
   "dependencies": {
-    "serialport-manager": "0.0.1",
     "ansi": "~0.1.2",
-    "glob": "~3.1.10",
     "async": "~0.1.22",
-    "color": "~0.4.1",
-    "socket.io": "0.9.10",
-    "optimist": "~0.3.4",
-    "semver": "1.0.14",
-    "request": "~2.10.0",
     "chip.avr.lufacdc": "0.0.1",
-    "ecstatic": "0.1.6",
-    "event-stream": "~3.0.7"
+    "color": "~0.4.1",
+    "event-stream": "~3.0.7",
+    "glob": "^4.0.6",
+    "optimist": "~0.3.4",
+    "request": "~2.10.0",
+    "semver": "1.0.14",
+    "serialport": "^1.4.6"
   },
   "bin": {
     "tpad": "./bin/tpad"

@@ -37,7 +37,11 @@ firmware.fetch = function(options, fn) {
 
   // get the latest firmware
   console.log('finding the latest firmware');
-  request('https://api.github.com/repos/tmpvar/tpad-firmware/git/refs/tags', function(err, res) {
+  request('https://api.github.com/repos/tmpvar/tpad-firmware/git/refs/tags', {
+    headers: {
+      'User-Agent' : 'tpad-flash'
+    }
+  }, function(err, res) {
     if (err) {
       return fn(err);
     }
@@ -71,6 +75,14 @@ firmware.fetch = function(options, fn) {
 // wait 2 seconds then run chip.avr.lufacdc's flash mechanism
 firmware.waitForReset = function(options, fn) {
 
+  options.serialport.once('close', function() {
+    setTimeout(function() {
+      clearInterval(interval);
+      fn();
+    }, 500);
+  });
+
+
   // attempt a software reset (as of firmware 0.0.2)
   if (options.tpad.version && semver.gte(options.tpad.version, '0.0.2')) {
     process.stdout.write('tpad is resetting')
@@ -79,24 +91,8 @@ firmware.waitForReset = function(options, fn) {
     console.log(' ** Please press reset on the device **');
   }
 
-  var state = 0;
-  setTimeout(function tick() {
-    fs.exists(options.serialport.port, function(e) {
-
-      // ready to go!
-      if (!e) {
-        process.stdout.write('.')
-        state = 1;
-        setTimeout(tick, 100);
-      } else if (state === 1) {
-        options.serialport.close();
-        setTimeout(function() {
-          fn();
-        }, 500);
-      } else {
-        setTimeout(tick, 100);
-      }
-    });
+  var interval = setInterval(function() {
+    process.stdout.write('.')
   }, 100);
 };
 
@@ -107,7 +103,7 @@ firmware.flash = function(hexData, options, fn) {
       return;
     }
 
-    var sp = new SerialPort(options.serialport.port);
+    var sp = new SerialPort(options.serialport.path);
 
     sp.on('open', function() {
       lufacdc.init(sp, function (err, flasher) {
